@@ -4,8 +4,6 @@ import Home from './components/Home';
 import VoiceInteraction from './components/VoiceInteraction';
 import SchemeResult from './components/SchemeResult';
 import { startListening } from './services/speechService';
-import { extractUserProfile } from './services/aiExtractor';
-import { findBestSchemeMatch } from './services/matchingEngine';
 
 function App() {
   // 'home' | 'listening' | 'result' | 'fallback'
@@ -25,31 +23,43 @@ function App() {
     setErrorMsg(null);
   };
 
-  const processInput = (text) => {
+  const processInput = async (text) => {
     setInteractionStatus('processing');
     
-    // Simulate API delay for understanding
-    setTimeout(() => {
-      const profile = extractUserProfile(text);
-      setExtractedProfile(profile);
+    try {
       setInteractionStatus('understanding');
       
-      // Simulate delay for searching
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      
+      setInteractionStatus('searching');
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const data = await response.json();
+      setExtractedProfile(data.extracted_profile);
+      
       setTimeout(() => {
-        setInteractionStatus('searching');
-        const match = findBestSchemeMatch(profile);
-        
-        setTimeout(() => {
-          if (match) {
-            setMatchData(match);
-            setView('result');
-          } else {
-            setErrorMsg("Abhi humein aapki information ke basis par suitable scheme nahi mili.");
-            setView('home');
-          }
-        }, 1000);
-      }, 1500);
-    }, 1500);
+        if (data.matched_schemes && data.matched_schemes.length > 0) {
+          // Play the audio message in a real app, here we just show it or pass it down
+          setMatchData(data.matched_schemes[0]);
+          setView('result');
+        } else {
+          setErrorMsg(data.audio_message || "Abhi humein aapki information ke basis par suitable scheme nahi mili.");
+          setView('home');
+        }
+      }, 1000); // Slight delay for UX
+      
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Connection error with the AI backend. Please try again.");
+      setView('home');
+    }
   };
 
   const handleStartListening = () => {

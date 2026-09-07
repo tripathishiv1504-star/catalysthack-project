@@ -1,0 +1,35 @@
+import sqlite3
+import json
+import os
+
+DB_PATH = os.path.join(os.path.dirname(__file__), 'schemes.db')
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db()
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS schemes (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            category TEXT,
+            description TEXT,
+            documents TEXT,
+            steps TEXT
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS match_criteria (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            scheme_id TEXT,
+            criteria_type TEXT,
+            value TEXT,
+            FOREIGN KEY(scheme_id) REFERENCES schemes(id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
