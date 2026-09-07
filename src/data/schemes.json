@@ -1,0 +1,88 @@
+[
+  {
+    "id": "scheme_001",
+    "name": "Post-Matric Scholarship",
+    "category": "education",
+    "description": "College students ke liye scholarship support.",
+    "match_criteria": {
+      "occupation": ["student", "chhatra", "chhatra"],
+      "education": ["college", "graduation", "post-graduation", "degree"],
+      "intent": ["scholarship", "padhai ke liye paise", "fees"]
+    },
+    "documents": [
+      "Aadhaar Card",
+      "College ID",
+      "Income Certificate",
+      "Bank Details"
+    ],
+    "steps": [
+      "NSP portal open karein.",
+      "Apni Aadhaar details link aur verify karein.",
+      "Application submit karke college verification complete karein."
+    ]
+  },
+  {
+    "id": "scheme_002",
+    "name": "Kisan Samman Nidhi",
+    "category": "agriculture",
+    "description": "Kisanon ke liye aarthik sahayata yojana.",
+    "match_criteria": {
+      "occupation": ["farmer", "kisan", "kheti", "kheti-bari"],
+      "education": [],
+      "intent": ["financial help", "paise", "sahayata", "kheti ke liye"]
+    },
+    "documents": [
+      "Aadhaar Card",
+      "Land Record (Khasra/Khatauni)",
+      "Bank Passbook"
+    ],
+    "steps": [
+      "PM Kisan portal par jayen.",
+      "Farmer Corner mein 'New Farmer Registration' par click karein.",
+      "Aadhaar aur zameen ki details bharkar submit karein."
+    ]
+  },
+  {
+    "id": "scheme_003",
+    "name": "PM SVANidhi",
+    "category": "business",
+    "description": "Street vendors ke liye working capital loan yojana.",
+    "match_criteria": {
+      "occupation": ["street vendor", "thela", "stall", "rehdi", "chhota business"],
+      "education": [],
+      "intent": ["loan", "business", "financial support"]
+    },
+    "documents": [
+      "Aadhaar Card",
+      "Vending Certificate (ULB)",
+      "Bank Account Details"
+    ],
+    "steps": [
+      "PM SVANidhi portal open karein.",
+      "Apna mobile number aur Aadhaar verify karein.",
+      "Loan application form bharkar submit karein."
+    ]
+  },
+  {
+    "id": "scheme_004",
+    "name": "Mudra Yojana",
+    "category": "business",
+    "description": "Chhote aur madhyam udyamiyo ke liye business loan.",
+    "match_criteria": {
+      "occupation": ["business", "vyapar", "dukaan", "entrepreneur"],
+      "education": [],
+      "intent": ["loan", "business badhane ke liye", "paise"]
+    },
+    "documents": [
+      "Aadhaar Card",
+      "Business Proof",
+      "Bank Statement",
+      "Project Report"
+    ],
+    "steps": [
+      "Apne nazdiki bank branch mein jayen ya Udyamimitra portal kholen.",
+      "Mudra Loan application form bharein.",
+      "Apne business proof aur documents bank mein jama karein."
+    ]
+  }
+]
