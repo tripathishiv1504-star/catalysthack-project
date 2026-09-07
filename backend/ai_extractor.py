@@ -1,6 +1,9 @@
 import os
 import json
 import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Try to use Gemini if API key is present
 API_KEY = os.environ.get("GEMINI_API_KEY")
