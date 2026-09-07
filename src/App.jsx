@@ -139,11 +139,17 @@ function App() {
 
   return (
     <div className="app-container">
-      <Header />
+      <Header onHomeClick={resetApp} />
       
       {errorMsg && (
-        <div style={{ backgroundColor: 'var(--danger)', color: 'white', padding: '1rem', textAlign: 'center' }}>
-          {errorMsg}
+        <div style={{ backgroundColor: 'var(--danger)', color: 'white', padding: '1rem', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
+          <span>{errorMsg}</span>
+          <button 
+            onClick={resetApp}
+            style={{ padding: '0.25rem 0.75rem', backgroundColor: 'rgba(255,255,255,0.2)', border: '1px solid white', borderRadius: '4px', color: 'white', cursor: 'pointer' }}
+          >
+            Try Again
+          </button>
         </div>
       )}
 
