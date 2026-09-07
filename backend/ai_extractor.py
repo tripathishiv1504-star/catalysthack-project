@@ -1,76 +1,152 @@
 import os
 import json
+import re
+from pathlib import Path
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from backend dir and project root
+env_paths = [
+    Path(__file__).parent / '.env',
+    Path(__file__).parent.parent / '.env'
+]
+for p in env_paths:
+    if p.exists():
+        load_dotenv(p)
 
-# Try to use Gemini if API key is present
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
+primary_model = None
+fallback_model = None
+
 if API_KEY:
-    genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-else:
-    model = None
+    try:
+        genai.configure(api_key=API_KEY)
+        # gemini-3.5-flash-lite is the active fast model
+        primary_model = genai.GenerativeModel('gemini-3.5-flash-lite')
+        fallback_model = genai.GenerativeModel('gemini-3.6-flash')
+    except Exception as e:
+        print(f"GenAI configuration warning: {e}")
+
+def _clean_and_parse_json(text: str) -> dict:
+    """Safely extracts JSON dict from text."""
+    try:
+        # Match outermost curly brackets
+        match = re.search(r'\{[\s\S]*\}', text)
+        if match:
+            return json.loads(match.group(0))
+    except Exception:
+        pass
+    return None
 
 def extract_profile_from_text(text: str) -> dict:
-    """Extracts occupation, education, and intent from Hindi/Hinglish text."""
-    if model:
-        prompt = f"""
-        Extract the following information from the user's input.
-        The input might be in Hindi, English, or Hinglish.
-        Return ONLY a raw JSON object with no markdown formatting.
-        
-        Fields:
-        - occupation: The person's job or role (e.g. "student", "farmer", "street vendor", "business").
-        - education: Educational status if mentioned (e.g. "college", "10th pass", "graduate").
-        - intent: What they want (e.g. "scholarship", "loan", "financial help").
-        
-        User input: "{text}"
-        
-        JSON format:
-        {{
-            "occupation": "value or null",
-            "education": "value or null",
-            "intent": "value or null"
-        }}
-        """
-        try:
-            response = model.generate_content(prompt)
-            raw = response.text.replace('```json', '').replace('```', '').strip()
-            return json.loads(raw)
-        except Exception as e:
-            print("LLM Error:", e)
-            # fallback to keyword
-            pass
-            
-    # Robust Mock/Keyword fallback if no API key or LLM fails
-    text_lower = text.lower()
+    """Extracts occupation, education, and intent from Hindi/Hinglish/English text."""
+    prompt = f"""
+    You are an AI assistant for the Indian Government welfare navigator "VaaniAccess".
+    Analyze the user's spoken or typed requirement (in Hindi, Hinglish, or English).
+    Extract their profile details to match government welfare schemes.
+    
+    Fields to extract:
+    - occupation: The person's role or livelihood (e.g. "student", "farmer", "street vendor", "small business", "artisan", "unemployed", "homemaker", "laborer", "daily wage worker").
+    - education: Educational stage if mentioned (e.g. "school", "college", "10th pass", "12th pass", "graduate", "post-graduate", "degree").
+    - intent: What assistance they seek (e.g. "scholarship", "loan", "financial aid", "health insurance", "pucca house", "toolkit subsidy", "daughter savings").
+    - category: The welfare domain ("education", "agriculture", "business", "healthcare", "housing", "social welfare").
+
+    User text: "{text}"
+
+    Return ONLY a single valid JSON object. Do not include markdown codeblocks or explanation.
+    Example JSON:
+    {{
+        "occupation": "student",
+        "education": "college",
+        "intent": "scholarship",
+        "category": "education"
+    }}
+    """
+
+    for m in (primary_model, fallback_model):
+        if m:
+            try:
+                response = m.generate_content(prompt)
+                if response and response.text:
+                    parsed = _clean_and_parse_json(response.text)
+                    if parsed and isinstance(parsed, dict):
+                        # Ensure keys exist
+                        return {
+                            "occupation": parsed.get("occupation"),
+                            "education": parsed.get("education"),
+                            "intent": parsed.get("intent"),
+                            "category": parsed.get("category")
+                        }
+            except Exception as e:
+                print(f"Gemini generation error: {e}")
+                continue
+
+    # Robust Keyword/Context Fallback (handles Hindi, Hinglish, English)
+    t = text.lower()
     profile = {
         "occupation": None,
         "education": None,
-        "intent": None
+        "intent": None,
+        "category": None
     }
-    
-    if "student" in text_lower or "chhatra" in text_lower or "vidyarthi" in text_lower:
+
+    # Education / Student
+    if any(k in t for k in ["student", "chhatra", "vidyarthi", "padhai", "study", "studies"]):
         profile["occupation"] = "student"
-    if "college" in text_lower or "degree" in text_lower or "graduation" in text_lower:
+        profile["category"] = "education"
+    if any(k in t for k in ["college", "degree", "graduation", "university", "btech", "ba", "bsc", "diploma"]):
         profile["education"] = "college"
-    if "scholarship" in text_lower or "fees" in text_lower:
+    elif any(k in t for k in ["school", "10th", "12th", "matric"]):
+        profile["education"] = "school"
+    if any(k in t for k in ["scholarship", "fees", "fee", "wazifa", "padhai ke paise", "stipend"]):
         profile["intent"] = "scholarship"
-        
-    if "farmer" in text_lower or "kisan" in text_lower or "kheti" in text_lower:
+        profile["category"] = "education"
+
+    # Agriculture / Farmers
+    if any(k in t for k in ["farmer", "kisan", "kisaan", "kheti", "kheti-bari", "fasal", "krishi", "agriculture"]):
         profile["occupation"] = "farmer"
-    if "financial help" in text_lower or "paise" in text_lower or "sahayata" in text_lower:
-        if not profile["intent"]: profile["intent"] = "financial help"
-    
-    if "vendor" in text_lower or "thela" in text_lower or "rehdi" in text_lower:
+        profile["category"] = "agriculture"
+        if any(k in t for k in ["sahayata", "paise", "kist", "subsidy", "financial help", "money"]):
+            profile["intent"] = "financial help"
+
+    # Street Vendors & Small Business
+    if any(k in t for k in ["vendor", "thela", "rehdi", "stall", "feri", "street vendor", "hawker"]):
         profile["occupation"] = "street vendor"
-        
-    if "business" in text_lower or "loan" in text_lower or "vyapar" in text_lower:
-        if not profile["intent"]: profile["intent"] = "loan"
-        if "business" in text_lower or "vyapar" in text_lower:
-            profile["occupation"] = "business"
-            
+        profile["category"] = "business"
+        profile["intent"] = "loan"
+    elif any(k in t for k in ["business", "vyapar", "dukaan", "shop", "entrepreneur", "start", "shuru"]):
+        profile["occupation"] = "business"
+        profile["category"] = "business"
+        profile["intent"] = "loan"
+
+    # Healthcare / Ayushman
+    if any(k in t for k in ["health", "hospital", "ilaj", "bimar", "bimari", "doctor", "medicine", "dawa", "treatment", "ayushman"]):
+        profile["intent"] = "health insurance"
+        profile["category"] = "healthcare"
+
+    # Housing / PM Awas
+    if any(k in t for k in ["ghar", "makan", "house", "pucca ghar", "housing", "awas"]):
+        profile["intent"] = "housing subsidy"
+        profile["category"] = "housing"
+
+    # Traditional Artisans / Vishwakarma
+    if any(k in t for k in ["artisan", "karigar", "lohar", "badhai", "carpenter", "blacksmith", "darzi", "tailor", "vishwakarma", "hath ka kaam"]):
+        profile["occupation"] = "artisan"
+        profile["intent"] = "toolkit subsidy and loan"
+        profile["category"] = "business"
+
+    # Women & Daughter Welfare
+    if any(k in t for k in ["beti", "daughter", "girl", "sukanya", "mahila", "aurat", "lady"]):
+        profile["intent"] = "savings for daughter"
+        profile["category"] = "social welfare"
+
+    # General Financial Assistance / Loan
+    if not profile["intent"]:
+        if any(k in t for k in ["loan", "karz", "kredit", "credit"]):
+            profile["intent"] = "loan"
+        elif any(k in t for k in ["sahayata", "madad", "help", "paise", "subsidy"]):
+            profile["intent"] = "financial help"
+
     return profile
+

@@ -3,13 +3,18 @@ import os
 from database import init_db, get_db
 
 def seed_data():
-    init_db()
     conn = get_db()
     c = conn.cursor()
     
-    # clear existing
-    c.execute('DELETE FROM match_criteria')
-    c.execute('DELETE FROM schemes')
+    # drop existing to recreate with new columns
+    c.execute('DROP TABLE IF EXISTS match_criteria')
+    c.execute('DROP TABLE IF EXISTS schemes')
+    conn.commit()
+    conn.close()
+
+    init_db()
+    conn = get_db()
+    c = conn.cursor()
     
     json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src', 'data', 'schemes.json')
     if not os.path.exists(json_path):
@@ -21,12 +26,14 @@ def seed_data():
         
     for s in schemes:
         c.execute('''
-            INSERT INTO schemes (id, name, category, description, documents, steps)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO schemes (id, name, category, benefit, official_url, description, documents, steps)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             s['id'], 
             s['name'], 
-            s['category'], 
+            s['category'],
+            s.get('benefit', ''),
+            s.get('official_url', ''),
             s['description'], 
             json.dumps(s['documents']), 
             json.dumps(s['steps'])

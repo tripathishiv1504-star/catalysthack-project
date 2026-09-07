@@ -1,23 +1,111 @@
-import React from 'react';
-import { Mic2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mic2, Landmark, Compass, HelpCircle, Menu, X, BookOpen, Layers } from 'lucide-react';
 
-const Header = ({ onHomeClick }) => {
+const Header = ({ activeTab, onSelectTab, onHomeClick }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleNav = (tab) => {
+    onSelectTab(tab);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="header">
-      <div 
-        className="header-logo" 
-        onClick={onHomeClick} 
-        style={{ cursor: 'pointer' }}
-      >
-        <Mic2 size={28} className="text-primary" />
-        VaaniAccess
+      <div className="header-left">
+        <div 
+          className="header-logo" 
+          onClick={() => { if (onHomeClick) onHomeClick(); onSelectTab('home'); }}
+        >
+          <div className="logo-icon-wrap">
+            <Mic2 size={22} />
+          </div>
+          <div>
+            <span>VaaniAccess</span>
+          </div>
+        </div>
+        <span className="gov-emblem-tag">
+          <Landmark size={14} style={{ color: '#e65100' }} />
+          National Welfare Navigator
+        </span>
       </div>
+
+      {/* Desktop navigation */}
       <nav className="nav-links">
-        <a href="#" onClick={(e) => { e.preventDefault(); if(onHomeClick) onHomeClick(); }}>Home</a>
-        <a href="#" onClick={(e) => e.preventDefault()}>How It Works</a>
-        <a href="#" onClick={(e) => e.preventDefault()}>Schemes</a>
-        <a href="#" onClick={(e) => e.preventDefault()}>Help</a>
+        <button 
+          className={`nav-link ${activeTab === 'home' ? 'active' : ''}`}
+          onClick={() => handleNav('home')}
+        >
+          <Compass size={17} />
+          Voice Assistant
+        </button>
+
+        <button 
+          className={`nav-link ${activeTab === 'schemes' ? 'active' : ''}`}
+          onClick={() => handleNav('schemes')}
+        >
+          <Layers size={17} />
+          All Schemes
+        </button>
+
+        <button 
+          className={`nav-link ${activeTab === 'how-it-works' ? 'active' : ''}`}
+          onClick={() => handleNav('how-it-works')}
+        >
+          <BookOpen size={17} />
+          How It Works
+        </button>
+
+        <button 
+          className={`nav-link ${activeTab === 'help' ? 'active' : ''}`}
+          onClick={() => handleNav('help')}
+        >
+          <HelpCircle size={17} />
+          Help & FAQs
+        </button>
       </nav>
+
+      {/* Mobile menu toggle */}
+      <button 
+        className="mobile-nav-toggle"
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        aria-label="Toggle Navigation Menu"
+      >
+        {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+      </button>
+
+      {/* Mobile dropdown */}
+      {mobileMenuOpen && (
+        <div className="mobile-menu-drawer">
+          <button 
+            className={`nav-link ${activeTab === 'home' ? 'active' : ''}`}
+            onClick={() => handleNav('home')}
+          >
+            <Compass size={18} />
+            Voice Assistant
+          </button>
+          <button 
+            className={`nav-link ${activeTab === 'schemes' ? 'active' : ''}`}
+            onClick={() => handleNav('schemes')}
+          >
+            <Layers size={18} />
+            All Schemes (सभी योजनाएं)
+          </button>
+          <button 
+            className={`nav-link ${activeTab === 'how-it-works' ? 'active' : ''}`}
+            onClick={() => handleNav('how-it-works')}
+          >
+            <BookOpen size={18} />
+            How It Works (कैसे काम करता है)
+          </button>
+          <button 
+            className={`nav-link ${activeTab === 'help' ? 'active' : ''}`}
+            onClick={() => handleNav('help')}
+          >
+            <HelpCircle size={18} />
+            Help & Helplines (सहायता)
+          </button>
+        </div>
+      )}
     </header>
   );
 };

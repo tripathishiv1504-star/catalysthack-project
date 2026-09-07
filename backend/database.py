@@ -17,6 +17,8 @@ def init_db():
             id TEXT PRIMARY KEY,
             name TEXT,
             category TEXT,
+            benefit TEXT,
+            official_url TEXT,
             description TEXT,
             documents TEXT,
             steps TEXT
