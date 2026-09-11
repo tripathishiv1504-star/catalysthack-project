@@ -11,7 +11,8 @@ import {
   Sparkles,
   ShieldCheck,
   Zap,
-  Volume2
+  Volume2,
+  Tablet
 } from 'lucide-react';
 
 const Home = ({ onStartListening, onSearchText }) => {
@@ -25,6 +26,13 @@ const Home = ({ onStartListening, onSearchText }) => {
   };
 
   const quickPrompts = [
+    {
+      icon: <Tablet size={22} color="#1a73e8" />,
+      bg: '#e8f0fe',
+      title: 'Free Tablet Yojana',
+      text: 'Mujhe padhai ke liye free tablet / smartphone yojana chahiye',
+      category: 'Education'
+    },
     {
       icon: <GraduationCap size={22} color="#1a73e8" />,
       bg: '#e8f0fe',

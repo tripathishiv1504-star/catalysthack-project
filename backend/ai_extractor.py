@@ -2,24 +2,29 @@ import os
 import json
 import re
 from pathlib import Path
-import google.generativeai as genai
-from dotenv import load_dotenv
-
-# Load .env from backend dir and project root
-env_paths = [
-    Path(__file__).parent / '.env',
-    Path(__file__).parent.parent / '.env'
-]
-for p in env_paths:
-    if p.exists():
-        load_dotenv(p)
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+try:
+    from dotenv import load_dotenv
+    # Load .env from backend dir and project root
+    env_paths = [
+        Path(__file__).parent / '.env',
+        Path(__file__).parent.parent / '.env'
+    ]
+    for p in env_paths:
+        if p.exists():
+            load_dotenv(p)
+except ImportError:
+    pass
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
 primary_model = None
 fallback_model = None
 
-if API_KEY:
+if API_KEY and genai:
     try:
         genai.configure(api_key=API_KEY)
         # gemini-3.5-flash-lite is the active fast model
@@ -49,7 +54,7 @@ def extract_profile_from_text(text: str) -> dict:
     Fields to extract:
     - occupation: The person's role or livelihood (e.g. "student", "farmer", "street vendor", "small business", "artisan", "unemployed", "homemaker", "laborer", "daily wage worker").
     - education: Educational stage if mentioned (e.g. "school", "college", "10th pass", "12th pass", "graduate", "post-graduate", "degree").
-    - intent: What assistance they seek (e.g. "scholarship", "loan", "financial aid", "health insurance", "pucca house", "toolkit subsidy", "daughter savings").
+    - intent: What assistance they seek (e.g. "free tablet", "scholarship", "loan", "financial aid", "health insurance", "pucca house", "toolkit subsidy", "daughter savings").
     - category: The welfare domain ("education", "agriculture", "business", "healthcare", "housing", "social welfare").
 
     User text: "{text}"
@@ -59,7 +64,7 @@ def extract_profile_from_text(text: str) -> dict:
     {{
         "occupation": "student",
         "education": "college",
-        "intent": "scholarship",
+        "intent": "free tablet",
         "category": "education"
     }}
     """
@@ -91,15 +96,22 @@ def extract_profile_from_text(text: str) -> dict:
         "category": None
     }
 
-    # Education / Student
-    if any(k in t for k in ["student", "chhatra", "vidyarthi", "padhai", "study", "studies"]):
+    # Education / Student & Free Tablet / Smartphone / Scholarship
+    if any(k in t for k in ["tablet", "tab", "smartphone", "smart phone", "laptop", "digishakti", "muft tablet", "free tablet", "free smartphone"]):
+        profile["occupation"] = "student"
+        profile["education"] = "college"
+        profile["intent"] = "free tablet"
+        profile["category"] = "education"
+    elif any(k in t for k in ["student", "chhatra", "vidyarthi", "padhai", "study", "studies"]):
         profile["occupation"] = "student"
         profile["category"] = "education"
-    if any(k in t for k in ["college", "degree", "graduation", "university", "btech", "ba", "bsc", "diploma"]):
+
+    if any(k in t for k in ["college", "degree", "graduation", "university", "btech", "ba", "bsc", "diploma", "iti", "polytechnic"]):
         profile["education"] = "college"
     elif any(k in t for k in ["school", "10th", "12th", "matric"]):
         profile["education"] = "school"
-    if any(k in t for k in ["scholarship", "fees", "fee", "wazifa", "padhai ke paise", "stipend"]):
+
+    if not profile["intent"] and any(k in t for k in ["scholarship", "fees", "fee", "wazifa", "padhai ke paise", "stipend"]):
         profile["intent"] = "scholarship"
         profile["category"] = "education"
 

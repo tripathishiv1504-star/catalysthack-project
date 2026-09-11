@@ -1,12 +1,23 @@
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
+from ai_extractor import extract_profile_from_text
 from main import get_schemes_from_profile
 
-profile = {
-    "occupation": "student",
-    "education": "college",
-    "intent": "scholarship"
-}
-schemes = get_schemes_from_profile(profile)
-print("Matched schemes:", [s['name'] for s in schemes])
+tests = [
+    'give me some free tablet yojna',
+    'free tablet yojana',
+    'main college student hoon scholarship chahiye',
+]
+
+for query in tests:
+    profile = extract_profile_from_text(query)
+    schemes = get_schemes_from_profile(profile, raw_text=query)
+    top = schemes[0] if schemes else None
+    print(f"Query: '{query}'")
+    print(f"  Extracted Profile: {profile}")
+    if top:
+        print(f"  Matched: {top['name']} ({top['official_url']}) - Score: {top['score']}%\n")
+    else:
+        print("  No match found.\n")
+

@@ -28,13 +28,18 @@ const faqs = [
   {
     q: 'अगर मेरे पास माइक्रोफोन नहीं है या आवाज़ काम न करे?',
     a: 'मुखपृष्ठ पर एक टेक्स्ट सर्च बॉक्स भी दिया गया है जहाँ आप अपनी आवश्यकता सीधे टाइप करके भी तुरंत सही योजना खोज सकते हैं।'
+  },
+  {
+    q: 'फ्री टैबलेट / स्मार्टफोन योजना (DigiShakti) के लिए कैसे आवेदन करें?',
+    a: 'फ्री टैबलेट व स्मार्टफोन योजना के लिए छात्र को अलग से कोई फॉर्म नहीं भरना होता। संबंधित कॉलेज/विश्वविद्यालय द्वारा पात्र विद्यार्थियों का डेटा सीधे डिज़ीशक्ति पोर्टल (digishakti.up.gov.in) पर अपलोड किया जाता है। छात्र पोर्टल पर अपना स्टेटस चेक कर सकते हैं।'
   }
 ];
 
 const helplines = [
+  { name: 'DigiShakti (फ्री टैबलेट/स्मार्टफोन हेल्पलाइन)', num: '0522-2237000 / 1905', hours: 'Office hours' },
+  { name: 'National Scholarship Portal Helpline', num: '0120-6619540', hours: 'Mon - Fri' },
   { name: 'Kisan Call Centre (किसान हेल्पलाइन)', num: '1800-180-1551', hours: '6 AM - 10 PM' },
   { name: 'Ayushman Bharat PM-JAY (स्वास्थ्य)', num: '14555 / 1800-111-565', hours: '24x7 Toll Free' },
-  { name: 'National Scholarship Portal Helpline', num: '0120-6619540', hours: 'Mon - Fri' },
   { name: 'PM SVANidhi (स्ट्रीट वेंडर लोन)', num: '1800-11-1979', hours: 'Toll Free' },
   { name: 'PMAY Housing Helpline (आवास योजना)', num: '1800-11-6163', hours: 'Office hours' }
 ];

@@ -198,5 +198,32 @@
       "Beti ka birth certificate aur parents ke KYC documents ke saath minimum ₹250 jama karein.",
       "Saal mein ₹250 se ₹1.5 Lakh tak deposit karein aur beti ke 18/21 saal hone par puri rashi payen."
     ]
+  },
+  {
+    "id": "scheme_009",
+    "name": "Free Smartphone & Tablet Yojana (DigiShakti Scheme)",
+    "category": "education",
+    "benefit": "Free Tablet / Smartphone for students + Preloaded educational content & digital skills access",
+    "official_url": "https://digishakti.up.gov.in",
+    "description": "Graduation, Post-Graduation, Diploma, ITI, Polytechnic aur higher education ke chhatron ko muft tablet aur smartphone vitran yojana jisse ve digital padhai aur competitive exams ki taiyari kar sakein.",
+    "match_criteria": {
+      "occupation": ["student", "chhatra", "vidyarthi", "youth", "yuva", "college student"],
+      "education": ["college", "graduation", "post-graduation", "diploma", "iti", "polytechnic", "degree", "university", "12th pass", "higher education"],
+      "intent": ["tablet", "free tablet", "free tablet yojna", "free tablet yojana", "smartphone", "free smartphone", "tablet yojana", "tablet yojna", "laptop", "muft tablet", "digishakti", "digital device", "tab", "mobile device", "phone"]
+    },
+    "documents": [
+      "Aadhaar Card",
+      "College / University Student ID Card",
+      "Current Year Admission Slip / Fee Receipt",
+      "Previous Year Marksheets (10th, 12th or Last Semester)",
+      "Domicile / Niwas Praman Patra",
+      "Active Mobile Number linked with Aadhaar"
+    ],
+    "steps": [
+      "Aapke affiliated college ya university dwara eligible chhatron ka data sidhe DigiShakti portal (digishakti.up.gov.in) par upload aur verify kiya jata hai.",
+      "Chhatra DigiShakti portal par 'Know Your Status' option mein jakar apna University/Board aur Enrollment Number enter karke status check kar sakte hain.",
+      "Data verify hone par aapke registered mobile number par SMS aayega jisme vitran ki date aur college/nodal centre ki jankari hogi.",
+      "Nirdharit tithi par apne college campus mein aayojit samaroh mein biometric / ID verification ke baad apna muft tablet/smartphone prapt karein."
+    ]
   }
 ]
